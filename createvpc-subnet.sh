@@ -12,8 +12,11 @@ AWS_ID_Tabla_Enrutamiento=$(aws ec2 create-route-table --vpc-id $AWS_ID_VPC --ou
 # Asocia la tabla de enrutamiento con la subred privada
 aws ec2 associate-route-table --subnet-id $AWS_ID_Subnet_Privada --route-table-id $AWS_ID_Tabla_Enrutamiento
 
+# Crea una Elastic IP
+AWS_IP_Elastica=$(aws ec2 allocate-address --domain vpc --output text --query 'AllocationId')
+
 # Crea un NAT Gateway en la subred pública
-AWS_ID_NAT_Gateway=$(aws ec2 create-nat-gateway --subnet-id $AWS_ID_Subnet_Publica --allocation-id <Allocation_ID_de_tu_IP_Elastica> --output text --query 'NatGateway.NatGatewayId')
+AWS_ID_NAT_Gateway=$(aws ec2 create-nat-gateway --subnet-id $AWS_ID_Subnet_Publica --allocation-id $AWS_IP_Elastica --output text --query 'NatGateway.NatGatewayId')
 
 # Agrega una ruta en la tabla de enrutamiento para redirigir el tráfico de la subred privada a través del NAT Gateway
 aws ec2 create-route --route-table-id $AWS_ID_Tabla_Enrutamiento --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $AWS_ID_NAT_Gateway
