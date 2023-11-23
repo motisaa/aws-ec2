@@ -1,0 +1,112 @@
+Description: 'Mi primer VM-EC2'
+
+Parameters:
+  VPC:
+    Description: Selecciona un VPC por defecto
+    Type: 'AWS::EC2::VPC::Id'
+
+  Subnet:
+    Description: Selecciona una subnet disponible
+    Type: 'AWS::EC2::Subnet::Id'
+
+  InstanceType:
+    Description: Selecciona una posible instancia
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+
+  KeyPairName:
+    Description: Nombre del par de claves SSH
+    Type: 'AWS::EC2::KeyPair::KeyName'
+
+Mappings:
+  RegionMap:
+    eu-north-1:
+      AMI: ami-05bc2576a72f22c39
+    ap-south-1:
+      AMI: ami-0002bdad91f793433
+    eu-west-3:
+      AMI: ami-0c73cd1c5347436f3
+    eu-west-2:
+      AMI: ami-029ed17b4ea379178
+    eu-west-1:
+      AMI: ami-04632f3cef5083854
+    ap-northeast-3:
+      AMI: ami-0ae88850834d2c589
+    ap-northeast-2:
+      AMI: ami-0263588f2531a56bd
+    ap-northeast-1:
+      AMI: ami-0abaa5b0faf689830
+    sa-east-1:
+      AMI: ami-053a035b046dbb704
+    ca-central-1:
+      AMI: ami-0173297cea9ba27b0
+    ap-southeast-1:
+      AMI: ami-0d1d4b8d5a0cd293f
+    ap-southeast-2:
+      AMI: ami-0f4484f62c4fd8767
+    eu-central-1:
+      AMI: ami-099ccc441b2ef41ec
+    us-east-1:
+      AMI: ami-061ac2e015473fbe2
+    us-east-2:
+      AMI: ami-056b1936002ca8ede
+    us-west-1:
+      AMI: ami-028f2b5ee08012131
+    us-west-2:
+      AMI: ami-0e21d4d9303512b8e
+
+Resources:
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP and SSH access
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  VM:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - AMI
+      InstanceType: !Ref InstanceType
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - !Ref WebServerSecurityGroup
+          SubnetId: !Ref Subnet
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: moti
+
+Outputs:
+  InstanceId:
+    Value: !Ref VM
+    Description: Instance id (connect via Session Manager)
+
+Metadata:
+  'AWS::CloudFormation::Designer':
+    ffca06ab-1dbb-416d-9774-0554be19ab4e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        y: 140
+      z: 1
+      embeds: []
