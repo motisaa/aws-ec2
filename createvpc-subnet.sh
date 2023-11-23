@@ -16,7 +16,7 @@ aws ec2 associate-route-table --subnet-id $AWS_ID_Subnet_Privada --route-table-i
 AWS_ID_NAT_Gateway=$(aws ec2 create-nat-gateway --subnet-id $AWS_ID_Subnet_Publica --allocation-id <Allocation_ID_de_tu_IP_Elastica> --output text --query 'NatGateway.NatGatewayId')
 
 # Agrega una ruta en la tabla de enrutamiento para redirigir el tráfico de la subred privada a través del NAT Gateway
-aws ec2 create-route --route-table-id $AWS_ID_Tabla_Enrutamiento --destination-cidr-block 0.0.0.0/0 --gateway-id $AWS_ID_NAT_Gateway
+aws ec2 create-route --route-table-id $AWS_ID_Tabla_Enrutamiento --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $AWS_ID_NAT_Gateway
 
 # Crea un grupo de seguridad para la instancia EC2 en la subred privada
 AWS_ID_GrupoSeguridad_EC2MOTI=$(aws ec2 create-security-group --group-name 'SecGroupMOTI' --description 'Permitir conexiones SSH' --vpc-id $AWS_ID_VPC --output text --query 'GroupId')
